@@ -32,16 +32,18 @@ namespace SF30thPlayerReader
 
                 if (playerNames.SequenceEqual(previousNames))
                 {
-                    Trace.WriteLine("No change.");
+                    Debug.WriteLine("No change.");
                     return;
                 }
+
+                Trace.WriteLine("Players updated.");
 
                 for (var i = 0; i < playerNames.Count; ++i)
                     Trace.WriteLine($"P{i + 1}: {playerNames[i]}");
 
                 WritePlayerNamesToFile(playerNames);
                 previousNames = playerNames;
-                Trace.WriteLine("Sleeping...");
+                Debug.WriteLine("Sleeping...");
             }, null, 0, 5000);
 
             Console.WriteLine("Press [Enter] to quit.");
@@ -53,7 +55,7 @@ namespace SF30thPlayerReader
             if (playerNames == null || !playerNames.Any())
                 return;
 
-            Trace.WriteLine("Writing player names to files...");
+            Debug.WriteLine("Writing player names to files...");
             File.WriteAllText("playersInLobby.txt", string.Join(", ", playerNames));
             File.WriteAllText("p1Name.txt", playerNames[0]);
             File.WriteAllText("p2Name.txt", playerNames.Count > 1 ? playerNames[1] : "");

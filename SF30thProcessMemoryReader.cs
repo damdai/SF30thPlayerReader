@@ -52,7 +52,7 @@ namespace SF30thPlayerReader
 
             try
             {
-                Trace.WriteLine("Reading player names...");
+                Debug.WriteLine("Reading player names...");
 
                 // Open game process.
                 var processName = "SF30thAnniversaryCollection";
