@@ -16,6 +16,7 @@ namespace SF30thPlayerReader
         static void Main()
         {
             Trace.Listeners.Add(new CustomTraceListener());
+            PrintTitle();
 
             var sf30thProcess = new SF30thProcessMemoryReader();
             var previousNames = new List<string>();
@@ -48,6 +49,15 @@ namespace SF30thPlayerReader
 
             Console.WriteLine("Press [Enter] to quit.");
             Console.ReadLine();
+        }
+
+        public static void PrintTitle()
+        {
+            Console.WriteLine(@"  ___ ___ ____ __  _   _    ___ _                   ___             _         
+ / __| __|__ //  \| |_| |_ | _ \ |__ _ _  _ ___ _ _| _ \___ __ _ __| |___ _ _ 
+ \__ \ _| |_ \ () |  _| ' \|  _/ / _` | || / -_) '_|   / -_) _` / _` / -_) '_|
+ |___/_| |___/\__/ \__|_||_|_| |_\__,_|\_, \___|_| |_|_\___\__,_\__,_\___|_|  
+                                       |__/ v1.0.0-beta");
         }
 
         public static void WritePlayerNamesToFile(List<string> playerNames)
