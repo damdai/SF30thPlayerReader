@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SF30thPlayerReader")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Reads lobby player names from SF30thAnniversaryCollection process memory and writes them to text files in the running directory that can be used to auto-update Twitch overlays.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SF30thPlayerReader")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCopyright("Copyright © Damdai 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

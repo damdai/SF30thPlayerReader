@@ -124,11 +124,11 @@ namespace SF30thPlayerReader
         /// <returns></returns>
         private long FindPlayerNamesAddress(Process process)
         {
-            // If we have already found the address, no need to scan.
-            if (_namesAddress != 0)
+            // If we have already found the address, no need to look for it again.
+            if (_namesAddress > 0)
                 return _namesAddress;
 
-            Trace.WriteLine("Searching for player names memory address...");
+            Trace.WriteLine("Searching for memory address of player names...");
 
             var maxAddress = 0xfffffffffff;
             var address = 0L;
@@ -154,14 +154,14 @@ namespace SF30thPlayerReader
                 {
                     var task = Task.Run(() =>
                     {
-                        var offset = FindPlayerNamesAddress(process, new long[] {
+                        var address = FindPlayerNamesAddress(process, new long[] {
                             (long)memInfo.BaseAddress,
                             (long)(memInfo.BaseAddress + memInfo.RegionSize - 1) });
 
-                        if (offset > -1)
+                        if (address > -1)
                         {
-                            Trace.WriteLine($"Address found: {offset}");
-                            _namesAddress = offset;
+                            Trace.WriteLine($"Address found: {address}");
+                            _namesAddress = address;
                             cts.Cancel();
                         }
                     }, cts.Token);
@@ -173,8 +173,10 @@ namespace SF30thPlayerReader
             {
                 Task.WaitAll(tasks.ToArray());
             }
-            catch
+            catch (AggregateException e1)
             {
+                foreach (var e2 in e1.InnerExceptions.Where(e => !(e is OperationCanceledException)))
+                    Trace.WriteLine(e2.Message, "Error");
             }
 
             return _namesAddress;
@@ -195,39 +197,42 @@ namespace SF30thPlayerReader
             Debug.WriteLine($"Searching for player names in block: [{addressRange[0]}-{addressRange[1]}]");
             var chunkSize = 16;
 
-            for (long offset = addressRange[0]; offset + chunkSize < addressRange[1] && _namesAddress <= 0; offset += chunkSize)
+            for (long address = addressRange[0]; address + chunkSize < addressRange[1] && _namesAddress <= 0; address += chunkSize)
             {
-                var memChunk = new ProcessMemoryChunk(process, (IntPtr)offset, chunkSize);
-                var bytes = memChunk.Read();
+                var memChunk = new ProcessMemoryChunk(process, (IntPtr)address, chunkSize);
+                var buf = memChunk.Read();
 
-                if (_signature.SequenceEqual(bytes.Take(8)) && bytes[8] != 0x00)
+                // Signature found!
+                if (_signature.SequenceEqual(buf.Take(8)) && buf[8] != 0x00)
                 {
-                    var name = ReadString(process, offset + 8);
+                    // Make sure Steam username follows, otherwise continue searching.
+                    var name = ReadString(process, address + 8);
 
                     if (name != _steamUser)
                         continue;
 
-                    offset += 4;
-                    var prevOffset = offset;
+                    // Backtrack to beginning of names block.
+                    var startAddress = address + 8;
                     var signature = _signature.Skip(4);
+                    address -= 92;
 
-                    for (var x = 0; x < 5 && offset > addressRange[0]; ++x, offset -= 96)
+                    for (var x = 0; x < 3 && address > addressRange[0]; ++x, address -= 96)
                     {
-                        memChunk = new ProcessMemoryChunk(process, (IntPtr)offset, 4);
-                        bytes = memChunk.Read();
+                        memChunk = new ProcessMemoryChunk(process, (IntPtr)address, 4);
+                        buf = memChunk.Read();
 
-                        if (!signature.SequenceEqual(bytes))
+                        // Found another name. Continue backtracking...
+                        if (signature.SequenceEqual(buf) && (name = ReadString(process, address + 4)) != null && name.Length >= 2 && name.Length <= 32)
                         {
-                            var str = ReadString(process, prevOffset + 4);
-
-                            if (str != null)
-                                return prevOffset + 4;
+                            startAddress = address + 4;
+                            continue;
                         }
 
-                        prevOffset = offset;
+                        // Did not find another name. We have found the beginning of the names block.
+                        break;
                     }
 
-                    return offset;
+                    return startAddress;
                 }
             }
 
