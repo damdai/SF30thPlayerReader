@@ -11,3 +11,5 @@ The following files will be created in the same directory and updated whenever a
 * playersInLobby.txt
 * p1Name.txt
 * p2Name.txt
+
+Note: If names stop updating for a few minutes, restart program.
