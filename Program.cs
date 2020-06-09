@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace SF30thPlayerReader
@@ -53,11 +54,11 @@ namespace SF30thPlayerReader
 
         public static void PrintTitle()
         {
-            Console.WriteLine(@"  ___ ___ ____ __  _   _    ___ _                   ___             _         
+            Console.WriteLine(@$"  ___ ___ ____ __  _   _    ___ _                   ___             _         
  / __| __|__ //  \| |_| |_ | _ \ |__ _ _  _ ___ _ _| _ \___ __ _ __| |___ _ _ 
  \__ \ _| |_ \ () |  _| ' \|  _/ / _` | || / -_) '_|   / -_) _` / _` / -_) '_|
  |___/_| |___/\__/ \__|_||_|_| |_\__,_|\_, \___|_| |_|_\___\__,_\__,_\___|_|  
-                                       |__/ v1.0.0-beta");
+                                       |__/ v{Assembly.GetExecutingAssembly().GetName().Version}-beta");
         }
 
         public static void WritePlayerNamesToFile(List<string> playerNames)
